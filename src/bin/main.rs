@@ -93,7 +93,8 @@ fn main() -> ! {
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     let mut periodic = PeriodicTimer::new(timg0.timer0);
     periodic.start(1_u64.secs()); //wrong time setting
-                                  //Variables for the hyperloop
+
+    //Variables for the hyperloop
     let mut can_data: [u8; 8] = [0; 8];
     let mut pin_value: u16;
     let mut start: esp_hal::time::Instant;
@@ -105,7 +106,7 @@ fn main() -> ! {
     loop {
         //read single shot of data from the DLHR
         let _ = i2c.write_read(41, &[0xAC], &mut dlhr_data);
-        //println!("{:?}", &dlhr_data);
+        println!("{:?}", &dlhr_data);
         frame = EspTwaiFrame::new_self_reception(device_id, &dlhr_data).unwrap();
         nb::block!(can.transmit(&frame)).unwrap();
 
@@ -128,6 +129,6 @@ fn main() -> ! {
         start = time::now();
         let _ = nb::block!(periodic.wait());
         end = time::now();
-        //println!("{}", end - start);
+        println!("{}", end - start);
     }
 }
