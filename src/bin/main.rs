@@ -47,10 +47,11 @@ impl spi_bitbang {
             cs: cs.into(),
         }
     }
-    fn get_adc(self) {
-        let (data_input, _) = self.miso.split();
-        let (_, select) = self.cs.split();
-        let (_, clock) = self.sclk.split();
+    fn get_adc(self) -> u16 {
+        let mut clk_output = Output::new(self.sclk, Level::High);
+        let mut data_in = Input::new(self.miso, Pull::Down);
+        let mut cs = Output::new(self.cs, Level::High);
+        todo!("Implement bit banging")
     }
 }
 
