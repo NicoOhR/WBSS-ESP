@@ -5,7 +5,9 @@ use core::prelude::*;
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay;
-use esp_hal::gpio::{Input, Io, Level, Output, Pull};
+use esp_hal::gpio::{AnyPin, GpioPin, Input, InputPin, Io, Level, Output, OutputPin, Pin, Pull};
+use esp_hal::peripheral::{Peripheral, PeripheralRef};
+use esp_hal::peripherals::Peripherals;
 use esp_hal::rtc_cntl::Rtc;
 use esp_hal::time::{Duration, ExtU64};
 use esp_hal::{
@@ -23,6 +25,35 @@ use timg::TimerGroup;
 
 const CAN_BAUDRATE: twai::BaudRate = twai::BaudRate::B250K;
 
+struct spi_bitbang {
+    sclk: AnyPin,
+    miso: AnyPin,
+    mosi: AnyPin,
+    cs: AnyPin,
+}
+
+impl spi_bitbang {
+    fn new<P1, P2, P3, P4>(sclk: P1, miso: P2, mosi: P3, cs: P4) -> Self
+    where
+        P1: Into<AnyPin>,
+        P2: Into<AnyPin>,
+        P3: Into<AnyPin>,
+        P4: Into<AnyPin>,
+    {
+        Self {
+            sclk: sclk.into(),
+            miso: miso.into(),
+            mosi: mosi.into(),
+            cs: cs.into(),
+        }
+    }
+    fn get_adc(self) {
+        let (data_input, _) = self.miso.split();
+        let (_, select) = self.cs.split();
+        let (_, clock) = self.sclk.split();
+    }
+}
+
 #[main]
 fn main() -> ! {
     #[allow(unused)]
@@ -38,14 +69,10 @@ fn main() -> ! {
         .with_sda(peripherals.GPIO11)
         .with_scl(peripherals.GPIO10);
     //SPI
-    let sclk = peripherals.GPIO0;
-    let miso = peripherals.GPIO6;
-    let mosi = peripherals.GPIO8;
-    let cs = peripherals.GPIO5;
 
     // test input for the PCNT
     let mut test_gpio = Output::new(peripherals.GPIO9, Level::High);
-    let mut cs_output = Output::new(cs, Level::High);
+
     //ADC Configuration
     type AdcCal = esp_hal::analog::adc::AdcCalBasic<esp_hal::peripherals::ADC1>;
     let analog_pin = peripherals.GPIO3;
@@ -92,7 +119,7 @@ fn main() -> ! {
     //Timer Config
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     let mut periodic = PeriodicTimer::new(timg0.timer0);
-    periodic.start(1_u64.secs()); //wrong time setting
+    let _ = periodic.start(1_u64.secs()); //wrong time setting
 
     //Variables for the hyperloop
     let mut can_data: [u8; 8] = [0; 8];
@@ -100,8 +127,16 @@ fn main() -> ! {
     let mut start: esp_hal::time::Instant;
     let mut end: esp_hal::time::Instant;
     let mut frame: EspTwaiFrame;
-    let mut extern_adc_value: [u8; 2] = [2; 2];
+    //let mut extern_adc_value: [u8; 2] = [2; 2];
     let mut dlhr_data: [u8; 8] = [0; 8];
+
+    //SPI
+    let sclk = peripherals.GPIO0;
+    let miso = peripherals.GPIO6;
+    let mosi = peripherals.GPIO8;
+    let cs = peripherals.GPIO5;
+
+    let spi = spi_bitbang::new(sclk, miso, mosi, cs);
 
     loop {
         //read single shot of data from the DLHR
@@ -112,14 +147,15 @@ fn main() -> ! {
 
         pin_value = nb::block!(adc1.read_oneshot(&mut adc1_pin)).unwrap();
 
-        println!("{:?}", extern_adc_value);
+        //println!("{:?}", extern_adc_value);
+        //
         for _ in 0..5 {
             test_gpio.toggle(); //testing PCNT
         }
 
         can_data[..2].copy_from_slice(&pin_value.to_be_bytes());
         can_data[2..4].copy_from_slice(&u0.counter.clone().get().to_be_bytes());
-        can_data[4..6].copy_from_slice(&extern_adc_value);
+        //can_data[4..6].copy_from_slice(&extern_adc_value);
 
         frame = EspTwaiFrame::new_self_reception(device_id, &can_data).unwrap();
         nb::block!(can.transmit(&frame)).unwrap();
