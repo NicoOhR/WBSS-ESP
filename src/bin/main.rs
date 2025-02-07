@@ -25,33 +25,44 @@ use timg::TimerGroup;
 
 const CAN_BAUDRATE: twai::BaudRate = twai::BaudRate::B250K;
 
-struct spi_bitbang {
-    sclk: AnyPin,
-    miso: AnyPin,
-    mosi: AnyPin,
-    cs: AnyPin,
+struct spi_bitbang<'a> {
+    sclk: Output<'a>,
+    miso: Input<'a>,
+    cs: Output<'a>,
 }
 
-impl spi_bitbang {
-    fn new<P1, P2, P3, P4>(sclk: P1, miso: P2, mosi: P3, cs: P4) -> Self
+impl spi_bitbang<'_> {
+    fn new<P1, P2, P3>(sclk: P1, miso: P2, cs: P3) -> Self
     where
         P1: Into<AnyPin>,
         P2: Into<AnyPin>,
         P3: Into<AnyPin>,
-        P4: Into<AnyPin>,
     {
         Self {
-            sclk: sclk.into(),
-            miso: miso.into(),
-            mosi: mosi.into(),
-            cs: cs.into(),
+            sclk: Output::new(sclk.into(), Level::High),
+            miso: Input::new(miso.into(), Pull::Down),
+            cs: Output::new(cs.into(), Level::High),
         }
     }
-    fn get_adc(self) -> u16 {
-        let mut clk_output = Output::new(self.sclk, Level::High);
-        let mut data_in = Input::new(self.miso, Pull::Down);
-        let mut cs = Output::new(self.cs, Level::High);
-        todo!("Implement bit banging")
+    fn get_adc(&mut self) -> u16 {
+        let mut ad: u16 = 0b0;
+        self.cs.set_low();
+        for i in 0..6 {
+            self.sclk.set_high();
+            self.sclk.set_low();
+        }
+
+        for i in 0..16 {
+            ad <<= 1;
+            if self.miso.is_high() {
+                ad |= 1;
+            }
+            self.sclk.set_high();
+            self.sclk.set_low();
+        }
+
+        self.cs.set_high();
+        ad
     }
 }
 
@@ -134,15 +145,16 @@ fn main() -> ! {
     //SPI
     let sclk = peripherals.GPIO0;
     let miso = peripherals.GPIO6;
-    let mosi = peripherals.GPIO8;
     let cs = peripherals.GPIO5;
 
-    let spi = spi_bitbang::new(sclk, miso, mosi, cs);
+    let mut spi = spi_bitbang::new(sclk, miso, cs);
 
     loop {
         //read single shot of data from the DLHR
         let _ = i2c.write_read(41, &[0xAC], &mut dlhr_data);
         println!("{:?}", &dlhr_data);
+        let extern_adc = spi.get_adc();
+        println!("{:?}", extern_adc);
         frame = EspTwaiFrame::new_self_reception(device_id, &dlhr_data).unwrap();
         nb::block!(can.transmit(&frame)).unwrap();
 
