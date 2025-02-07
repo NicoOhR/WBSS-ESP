@@ -78,8 +78,8 @@ fn main() -> ! {
 
     let mut i2c = I2c::new(peripherals.I2C0, Config::default())
         .unwrap()
-        .with_sda(peripherals.GPIO11)
-        .with_scl(peripherals.GPIO10);
+        .with_sda(peripherals.GPIO4)
+        .with_scl(peripherals.GPIO5);
     //SPI
 
     // test input for the PCNT
@@ -87,13 +87,13 @@ fn main() -> ! {
 
     //ADC Configuration
     type AdcCal = esp_hal::analog::adc::AdcCalBasic<esp_hal::peripherals::ADC1>;
-    let analog_pin = peripherals.GPIO3;
+    let analog_pin = peripherals.GPIO1;
     let mut adc1_config = AdcConfig::new();
     let mut adc1_pin = adc1_config.enable_pin(analog_pin, Attenuation::_11dB);
     let mut adc1 = Adc::new(peripherals.ADC1, adc1_config);
     //CAN configuration
-    let can_tx_pin = peripherals.GPIO2;
-    let can_rx_pin = peripherals.GPIO20;
+    let can_tx_pin = peripherals.GPIO11;
+    let can_rx_pin = peripherals.GPIO12;
 
     //change to normal mode and construct to new
     let mut can_config = twai::TwaiConfiguration::new(
@@ -116,7 +116,7 @@ fn main() -> ! {
     let pcnt = Pcnt::new(peripherals.PCNT);
     let u0 = pcnt.unit0;
     let ch0 = &u0.channel0;
-    let wheel_speed_sensor = Input::new(peripherals.GPIO4, Pull::Up);
+    let wheel_speed_sensor = Input::new(peripherals.GPIO7, Pull::Up);
 
     u0.set_high_limit(Some(255)).unwrap();
     u0.set_filter(Some(min(10u16 * 80, 1023u16))).unwrap();
@@ -143,9 +143,9 @@ fn main() -> ! {
     let mut dlhr_data: [u8; 8] = [0; 8];
 
     //SPI
-    let sclk = peripherals.GPIO0;
-    let miso = peripherals.GPIO6;
-    let cs = peripherals.GPIO5;
+    let sclk = peripherals.GPIO36;
+    let miso = peripherals.GPIO38;
+    let cs = peripherals.GPIO35;
 
     let mut spi = spi_bitbang::new(sclk, miso, cs);
 
