@@ -47,17 +47,19 @@ impl spi_bitbang<'_> {
     fn get_adc(&mut self) -> u16 {
         let mut ad: u16 = 0b0;
         self.cs.set_low();
-        for i in 0..6 {
-            self.sclk.set_high();
+        for i in 0..5 {
             self.sclk.set_low();
+            self.sclk.set_high();
         }
 
-        for i in 0..16 {
+        self.sclk.set_low();
+        for i in 0..15 {
+            self.sclk.set_high();
             ad <<= 1;
             if self.miso.is_high() {
+                println!("High");
                 ad |= 1;
             }
-            self.sclk.set_high();
             self.sclk.set_low();
         }
 
@@ -94,15 +96,16 @@ fn main() -> ! {
     //CAN configuration
     let can_tx_pin = peripherals.GPIO11;
     let can_rx_pin = peripherals.GPIO12;
-
     //change to normal mode and construct to new
     let mut can_config = twai::TwaiConfiguration::new(
         peripherals.TWAI0,
         can_rx_pin,
         can_tx_pin,
         CAN_BAUDRATE,
-        TwaiMode::SelfTest,
+        TwaiMode::Normal,
     );
+    let can_select = Output::new(peripherals.GPIO10, Level::Low);
+    can_config.set_error_warning_limit(u8::MAX);
 
     let can_filter = SingleStandardFilter::new(b"xxxxxxxxxxx", b"x", [b"xxxxxxxx", b"xxxxxxxx"]);
 
@@ -139,7 +142,7 @@ fn main() -> ! {
     let mut start: esp_hal::time::Instant;
     let mut end: esp_hal::time::Instant;
     let mut frame: EspTwaiFrame;
-    //let mut extern_adc_value: [u8; 2] = [2; 2];
+    let mut extern_adc_value: u16;
     let mut dlhr_data: [u8; 8] = [0; 8];
 
     //SPI
@@ -150,31 +153,38 @@ fn main() -> ! {
     let mut spi = spi_bitbang::new(sclk, miso, cs);
 
     loop {
+        println!("transmit error count: {:?}", can.transmit_error_count());
         //read single shot of data from the DLHR
         let _ = i2c.write_read(41, &[0xAC], &mut dlhr_data);
-        println!("{:?}", &dlhr_data);
+        println!("DLHR: {:?}", &dlhr_data);
         let extern_adc = spi.get_adc();
-        println!("{:?}", extern_adc);
-        frame = EspTwaiFrame::new_self_reception(device_id, &dlhr_data).unwrap();
-        nb::block!(can.transmit(&frame)).unwrap();
+        println!("Extern: {:?}", extern_adc);
+        frame = EspTwaiFrame::new(device_id, &dlhr_data).unwrap();
 
-        pin_value = nb::block!(adc1.read_oneshot(&mut adc1_pin)).unwrap();
-
-        //println!("{:?}", extern_adc_value);
-        //
-        for _ in 0..5 {
-            test_gpio.toggle(); //testing PCNT
+        match nb::block!(can.transmit(&frame)) {
+            Ok(_) => println!("Frame transmitted successfully."),
+            Err(e) => println!("Failed to transmit frame: {:?}", e),
         }
+        /*
+                pin_value = nb::block!(adc1.read_oneshot(&mut adc1_pin)).unwrap();
+                for _ in 0..5 {
+                    test_gpio.toggle(); //testing PCNT
+                }
 
-        can_data[..2].copy_from_slice(&pin_value.to_be_bytes());
+                can_data[..2].copy_from_slice(&pin_value.to_be_bytes());
+        */
         can_data[2..4].copy_from_slice(&u0.counter.clone().get().to_be_bytes());
-        //can_data[4..6].copy_from_slice(&extern_adc_value);
+        can_data[4..6].copy_from_slice(&extern_adc.to_be_bytes());
 
-        frame = EspTwaiFrame::new_self_reception(device_id, &can_data).unwrap();
+        println!("Can Array: {:?}", can_data);
+        frame = EspTwaiFrame::new(device_id, &can_data).unwrap();
+
+        match nb::block!(can.transmit(&frame)) {
+            Ok(_) => println!("Frame transmitted successfully."),
+            Err(e) => println!("Failed to transmit frame: {:?}", e),
+        }
         nb::block!(can.transmit(&frame)).unwrap();
-
         u0.clear();
-
         start = time::now();
         let _ = nb::block!(periodic.wait());
         end = time::now();
