@@ -1,5 +1,0 @@
-[0;33m--- esp-idf-monitor 1.5.0 on /dev/ttyUSB0 115200[0m
-[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
-[0;33m--- 0x403759a0: esp_restart_noos at /home/nicoor/esp/esp-idf/components/esp_system/port/soc/esp32s3/system_internal.c:160
-[0m
-[0m
