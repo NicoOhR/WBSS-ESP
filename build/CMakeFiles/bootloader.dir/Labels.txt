@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/nicoor/Projects/WBSS-ESP/build/CMakeFiles/bootloader
+/home/nicoor/Projects/WBSS-ESP/build/CMakeFiles/bootloader.rule
+/home/nicoor/Projects/WBSS-ESP/build/CMakeFiles/bootloader-complete.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/nicoor/Projects/WBSS-ESP/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
