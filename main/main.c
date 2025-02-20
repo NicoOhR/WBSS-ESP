@@ -6,11 +6,13 @@
 
 #include "ADS8320.h"
 #include "CAN_driver.h"
+#include "driver/gpio.h"
 #include "esp_chip_info.h"
 #include "esp_flash.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "hal/gpio_types.h"
 #include "sdkconfig.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -47,16 +49,22 @@ void chip_info(void) {
 
 void app_main(void) {
   init_ext_adc();
-  init_can();
+  // init_can();
   long data = 0;
-  uint8_t test[4] = {0x11, 0x22, 0x33, 0x44};
+  /*uint8_t test[4] = {0x11, 0x22, 0x33, 0x44};*/
   chip_info();
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
   // data = convert_to_volts(read_ext_adc());
-  data = read_ext_adc();
+  // data = read_ext_adc();
+  /*gpio_reset_pin(41);*/
+  /*gpio_set_direction(41, GPIO_MODE_OUTPUT);*/
+  /*gpio_set_level(41, 1);*/
   while (true) {
+    /*gpio_set_level(41, 0);*/
+    /*vTaskDelay(10000 / portTICK_PERIOD_MS); // Delay for 1 second*/
+    /*gpio_set_level(41, 1);*/
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+    data = read_ext_adc();
     printf("External ADC Value: %ld\n", data);
-    send_message(0x100, test, sizeof(test));
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //  send_message(0x100, test, sizeof(test));
   }
 }
