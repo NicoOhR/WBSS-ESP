@@ -2,6 +2,9 @@
 #define ESP_NOW_DRIVER_H
 
 #include "esp_now.h"
+#include "esp_netif.h"
+#include "esp_event.h"
+#include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include <stdio.h>

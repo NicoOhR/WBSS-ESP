@@ -75,7 +75,7 @@ void app_main(void) {
   /*gpio_reset_pin(41);*/
   /*gpio_set_direction(41, GPIO_MODE_OUTPUT);*/
   /*gpio_set_level(41, 1);*/
-  chip_info();
+  /*chip_info();*/
   if (esp_now_init_driver() != ESP_OK) {
     ESP_LOGE("MAIN", "Failed to initialize ESP-NOW");
     return;
