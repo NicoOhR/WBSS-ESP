@@ -75,17 +75,17 @@ void app_main(void) {
   /*gpio_reset_pin(41);*/
   /*gpio_set_direction(41, GPIO_MODE_OUTPUT);*/
   /*gpio_set_level(41, 1);*/
-  /*chip_info();*/
+
+  chip_info();
   if (esp_now_init_driver() != ESP_OK) {
     ESP_LOGE("MAIN", "Failed to initialize ESP-NOW");
     return;
   }
 
-  sensor_dataframe_t test = {
+  sensor_dataframe_t df = {
       .id = 1,
-      .linpot = 22,
+      .linpot = 0,
   };
-
   esp_now_register_recv_cb(on_recv);
   while (true) {
     /*gpio_set_level(41, 0);*/
