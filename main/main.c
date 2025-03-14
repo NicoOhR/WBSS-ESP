@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
+#include "ADC_driver.h"
 #include "ADS8320.h"
 #include "CAN_driver.h"
 #include "driver/gpio.h"
@@ -65,7 +66,10 @@ void on_recv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
 }
 
 void app_main(void) {
-  init_ext_adc();
+  init_adc();
+  // I don't believe either adc_raw or adc_voltage are actually ints
+  int adc_raw = 0;
+  int adc_voltage = 0;
   long data = 0;
   // pin testing + CAN
   /*init_can();*/
@@ -86,6 +90,7 @@ void app_main(void) {
       .id = 1,
       .linpot = 0,
   };
+
   esp_now_register_recv_cb(on_recv);
   while (true) {
     /*gpio_set_level(41, 0);*/
@@ -96,9 +101,10 @@ void app_main(void) {
     // relatively sure this does not work
     /*data = read_ext_adc();*/
     /*printf("External ADC Value: %ld\n", data);*/
-
+    // testing internal adc
+    read_adc(&adc_raw, &adc_voltage);
     // testing ESP_NOW
     vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
-    esp_now_send_data(&test);
+    esp_now_send_data(&df);
   }
 }
