@@ -1,7 +1,7 @@
 #include "CAN_driver.h"
 
-#define TX_GPIO 11
-#define RX_GPIO 12
+#define TX_GPIO 2
+#define RX_GPIO 42
 
 void init_can(void) {
   // General configuration

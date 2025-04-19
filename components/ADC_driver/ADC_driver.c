@@ -62,7 +62,7 @@ void init_adc() {
                                          ADC_ATTEN_DB_12, &adc_cali_handle);
 }
 
-void read_adc(int *raw, int *voltage) {
+void read_ADS8320(int *raw, int *voltage) {
   ESP_ERROR_CHECK(adc_oneshot_read(adc_handle, ADC_CHANNEL_4, raw));
   ESP_LOGI(TAG, "ADC Raw Data: %d", *raw);
 

@@ -18,6 +18,7 @@
 #include "hal/gpio_types.h"
 #include "sdkconfig.h"
 #include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
 
 void chip_info(void) {
@@ -92,6 +93,9 @@ void app_main(void) {
   };
 
   esp_now_register_recv_cb(on_recv);
+  uint8_t test[] = {1,2,3,4,5,6,7,8};
+  init_can();
+  send_message(1, test, 8);
   while (true) {
     /*gpio_set_level(41, 0);*/
     /*vTaskDelay(10000 / portTICK_PERIOD_MS); // Delay for 1 second*/
@@ -102,7 +106,7 @@ void app_main(void) {
     /*data = read_ext_adc();*/
     /*printf("External ADC Value: %ld\n", data);*/
     // testing internal adc
-    read_adc(&adc_raw, &adc_voltage);
+    // read_adc(&adc_raw, &adc_voltage);
     // testing ESP_NOW
     vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
     esp_now_send_data(&df);

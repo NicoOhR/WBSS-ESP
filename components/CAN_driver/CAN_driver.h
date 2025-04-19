@@ -1,3 +1,5 @@
+#ifndef CANDRIVER
+#define CANDRIVER
 #include <stdint.h>
 #include "driver/twai.h"
 #include "esp_err.h"
@@ -7,3 +9,4 @@
 void init_can();
 
 void send_message(uint32_t id, uint8_t *data, uint8_t data_len);
+#endif // !CANDRIVER

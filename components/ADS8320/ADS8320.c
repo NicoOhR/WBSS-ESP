@@ -10,7 +10,7 @@
 
 #endif
 
-void init_ext_adc() {
+void init_ADS8320() {
   gpio_reset_pin(41);
   gpio_reset_pin(2);
   gpio_reset_pin(42);
@@ -25,7 +25,7 @@ void init_ext_adc() {
   gpio_set_level(ADS8320_CLK, 1);
 }
 
-long read_ext_adc() {
+long read_ADS8329() {
   int i, dout;
   long data;
 
