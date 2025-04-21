@@ -29,7 +29,7 @@ esp_err_t esp_now_init_driver() {
   return ESP_OK;
 };
 
-esp_err_t esp_now_send_data(sensor_dataframe_t *sensor_data) {
+esp_err_t esp_now_send_data(suspension_dataframe_t *sensor_data) {
   esp_err_t result = esp_now_send(broadcastAddr, (uint8_t *)&sensor_data,
                                   sizeof(&sensor_data));
 

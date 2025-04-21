@@ -87,7 +87,7 @@ void app_main(void) {
     return;
   }
 
-  sensor_dataframe_t df = {
+  suspension_dataframe_t df = {
       .id = 1,
       .linpot = 0,
   };

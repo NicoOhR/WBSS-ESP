@@ -22,10 +22,10 @@ typedef struct __attribute__((packed)){
   //eventually: 
   //wheelspeed
   //DLHR
-} sensor_dataframe_t;
+} suspension_dataframe_t;
 
 
 esp_err_t esp_now_init_driver(void);
-esp_err_t esp_now_send_data(sensor_dataframe_t* sensor_data);
+esp_err_t esp_now_send_data(suspension_dataframe_t* sensor_data);
 
 #endif

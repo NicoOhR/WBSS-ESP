@@ -46,6 +46,7 @@ void send_message(uint32_t id, uint8_t *data, uint8_t data_len) {
       .extd = 0, // Standard frame
       .rtr = 0   // Data frame
   };
+
   memcpy(message.data, data, data_len);
 
   // Queue message for transmission
