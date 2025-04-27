@@ -48,7 +48,6 @@ void init_adc() {
   };
   ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc_handle));
 
-  //-------------ADC1 Config---------------//
   adc_oneshot_chan_cfg_t config = {
       .atten = ADC_ATTEN_DB_12,
       .bitwidth = ADC_BITWIDTH_DEFAULT,
@@ -56,13 +55,12 @@ void init_adc() {
   ESP_ERROR_CHECK(
       adc_oneshot_config_channel(adc_handle, ADC_CHANNEL_4, &config));
 
-  //-------------ADC1 Calibration Init---------------//
   adc_cali_handle_t adc1_cali_chan0_handle = NULL;
   do_calibration = _adc_calibration_init(ADC_UNIT_1, ADC_CHANNEL_4,
                                          ADC_ATTEN_DB_12, &adc_cali_handle);
 }
 
-void read_ADS8320(int *raw, int *voltage) {
+void read_internal_adc(int *raw, int *voltage) {
   ESP_ERROR_CHECK(adc_oneshot_read(adc_handle, ADC_CHANNEL_4, raw));
   ESP_LOGI(TAG, "ADC Raw Data: %d", *raw);
 

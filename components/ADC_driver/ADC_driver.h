@@ -10,6 +10,6 @@
 
 void init_adc(void);
 
-void read_adc(int *raw, int *voltage);
+void read_internal_adc(int *raw, int *voltage);
 
 #endif // !INTERNALADC

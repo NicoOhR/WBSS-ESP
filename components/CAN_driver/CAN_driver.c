@@ -1,4 +1,5 @@
 #include "CAN_driver.h"
+#include "hal/twai_types.h"
 
 #define TX_GPIO 2
 #define RX_GPIO 42
@@ -6,7 +7,7 @@
 void init_can(void) {
   // General configuration
   twai_general_config_t g_config =
-      TWAI_GENERAL_CONFIG_DEFAULT(TX_GPIO, RX_GPIO, TWAI_MODE_NORMAL);
+      TWAI_GENERAL_CONFIG_DEFAULT(TX_GPIO, RX_GPIO, TWAI_MODE_NO_ACK);
 
   // Timing configuration for 500 kbps
   twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();

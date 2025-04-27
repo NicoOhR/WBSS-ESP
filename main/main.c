@@ -5,9 +5,10 @@
  */
 
 #include "ADC_driver.h"
-#include "ADS8320.h"
+#include "ADS1015.h"
 #include "CAN_driver.h"
 #include "driver/gpio.h"
+#include "driver/i2c_types.h"
 #include "esp_chip_info.h"
 #include "esp_flash.h"
 #include "esp_now.h"
@@ -67,21 +68,11 @@ void on_recv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data,
 }
 
 void app_main(void) {
-  init_adc();
-  // I don't believe either adc_raw or adc_voltage are actually ints
-  int adc_raw = 0;
-  int adc_voltage = 0;
-  long data = 0;
-  // pin testing + CAN
-  /*init_can();*/
-  /*uint8_t test[4] = {0x11, 0x22, 0x33, 0x44};*/
-  /*data = convert_to_volts(read_ext_adc());*/
-  /*data = read_ext_adc();*/
-  /*gpio_reset_pin(41);*/
-  /*gpio_set_direction(41, GPIO_MODE_OUTPUT);*/
-  /*gpio_set_level(41, 1);*/
+  int16_t external_adc; 
 
+  init_adc();
   chip_info();
+
   if (esp_now_init_driver() != ESP_OK) {
     ESP_LOGE("MAIN", "Failed to initialize ESP-NOW");
     return;
@@ -93,22 +84,23 @@ void app_main(void) {
   };
 
   esp_now_register_recv_cb(on_recv);
+  
+  //can oneshot test
   uint8_t test[] = {1,2,3,4,5,6,7,8};
   init_can();
   send_message(1, test, 8);
+  int voltage, raw;
   while (true) {
-    /*gpio_set_level(41, 0);*/
-    /*vTaskDelay(10000 / portTICK_PERIOD_MS); // Delay for 1 second*/
-    /*gpio_set_level(41, 1);*/
-    /*send_message(0x100, test, sizeof(test));*/
-
-    // relatively sure this does not work
-    /*data = read_ext_adc();*/
-    /*printf("External ADC Value: %ld\n", data);*/
-    // testing internal adc
-    // read_adc(&adc_raw, &adc_voltage);
+    vTaskDelay(10000 / portTICK_PERIOD_MS); // Delay for 1 second
+    
+    //external adc
+    /* Declare a variable to store the ADC result and perform a single ended read */
+    read_internal_adc(&raw, &voltage);
+    printf("%u\n", raw);
+    
     // testing ESP_NOW
-    vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
-    esp_now_send_data(&df);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay for 1 second
+    // esp_now_send_data(&df);
   }
 }
+
